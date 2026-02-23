@@ -23,4 +23,10 @@ pictures/
 skills-lock.json
 
 # Reference files (original mockup, etc.)
-reference/.vercel
+reference/
+
+# Vercel local
+.vercel/
+
+# Excel exports
+*.xlsx
