@@ -302,28 +302,57 @@ export default function CatAdoptionForm() {
 
       <div style={pageStyle}>
         {step === "intro" && (
-          <div style={{ ...cardStyle, textAlign: "center", padding: mobile ? "36px 20px" : "56px 36px" }}>
-            <h1 style={{ fontFamily: "'Noto Serif TC', serif", fontSize: mobile ? 24 : 34, fontWeight: 700, color: "#3a2e26", marginBottom: 16, letterSpacing: 2 }}>
-              暹羅與小黑咖 領養申請表
-            </h1>
-            <p style={{ color: "#8b7d6b", fontSize: mobile ? 16 : 18, lineHeight: 1.8, margin: "0 0 28px" }}>
-              三隻小姐妹正在等一個溫暖的家 🏠
-            </p>
+          <div style={{ ...cardStyle, textAlign: "center", padding: mobile ? "36px 20px" : "56px 36px", maxWidth: mobile ? 620 : 700 }}>
+            <style>{`
+              @keyframes introFadeUp {
+                from { opacity: 0; transform: translateY(24px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+              .intro-avatar {
+                transition: transform 0.35s ease, box-shadow 0.35s ease;
+              }
+              .intro-avatar:hover {
+                transform: scale(1.08) translateY(-6px);
+                box-shadow: 0 14px 36px rgba(212,168,92,0.35);
+              }
+            `}</style>
 
-            <div style={{ display: "flex", justifyContent: "center", gap: mobile ? 10 : 28, marginBottom: mobile ? 28 : 36, flexWrap: "wrap" }}>
-              {INDIVIDUAL_CATS.map((cat) => (
-                <div key={cat.id} style={{ width: mobile ? 90 : 120, textAlign: "center" }}>
-                  <div style={{ width: mobile ? 90 : 120, height: mobile ? 90 : 120, borderRadius: "50%", overflow: "hidden", border: "3px solid #e8ddd0", boxShadow: "0 4px 16px rgba(0,0,0,0.12)", boxSizing: "border-box" }}>
+            {/* Title */}
+            <div style={{ animation: "introFadeUp 0.6s ease both" }}>
+              <h1 style={{ fontFamily: "'Noto Serif TC', serif", fontSize: mobile ? 26 : 36, fontWeight: 700, color: "#3a2e26", marginBottom: 4, letterSpacing: 2 }}>
+                暹羅與小黑咖
+              </h1>
+              <p style={{ fontFamily: "'Noto Serif TC', serif", fontSize: mobile ? 16 : 20, color: "#8b7d6b", margin: "0 0 6px", letterSpacing: 1 }}>
+                領養申請表
+              </p>
+              <p style={{ color: "#a08c6e", fontSize: mobile ? 14 : 16, lineHeight: 1.8, margin: "0 0 28px" }}>
+                三隻小姐妹正在等一個溫暖的家 🏠
+              </p>
+            </div>
+
+            {/* Cat avatars — larger */}
+            <div style={{ display: "flex", justifyContent: "center", gap: mobile ? 16 : 36, marginBottom: mobile ? 28 : 40, flexWrap: "wrap", padding: "0 16px" }}>
+              {INDIVIDUAL_CATS.map((cat, i) => (
+                <div key={cat.id} style={{ textAlign: "center", animation: `introFadeUp 0.6s ease ${0.15 + i * 0.12}s both` }}>
+                  <div className="intro-avatar" style={{
+                    width: mobile ? 130 : 170, height: mobile ? 130 : 170, borderRadius: "50%", overflow: "hidden",
+                    border: "4px solid #e8ddd0", boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+                    cursor: "pointer", boxSizing: "border-box", margin: "0 auto",
+                  }}>
                     <img src={CAT_AVATARS[cat.img]} alt={cat.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   </div>
-                  <p style={{ fontSize: mobile ? 14 : 15, color: "#5a4630", marginTop: 10, fontWeight: 600 }}>{cat.name}</p>
+                  <p style={{ fontSize: mobile ? 15 : 17, color: "#5a4630", marginTop: 12, marginBottom: 2, fontWeight: 600, fontFamily: "'Noto Serif TC', serif" }}>{cat.name}</p>
+                  <p style={{ fontSize: 12, color: "#a08c6e", margin: 0 }}>{cat.weight}</p>
                 </div>
               ))}
             </div>
 
-            <button onClick={() => setStep("catSelection")} style={{ ...btnPrimary, padding: "16px 56px", fontSize: mobile ? 17 : 18 }}>
-              我想領養 🐾
-            </button>
+            {/* CTA */}
+            <div style={{ paddingBottom: mobile ? 32 : 48, animation: "introFadeUp 0.6s ease 0.6s both" }}>
+              <button onClick={() => setStep("catSelection")} style={{ ...btnPrimary, padding: "16px 56px", fontSize: mobile ? 17 : 18 }}>
+                我想領養 🐾
+              </button>
+            </div>
           </div>
         )}
 
