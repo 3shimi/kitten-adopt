@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { supabase } from './lib/supabase'
 
 function useIsMobile(breakpoint = 480) {
   const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth <= breakpoint);
@@ -195,6 +196,9 @@ export default function CatAdoptionForm() {
 
   const [photos, setPhotos] = useState({ pets: [] });
 
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+
   const containerRef = useRef(null);
 
   useEffect(() => { setFadeIn(false); const t = setTimeout(() => setFadeIn(true), 50); return () => clearTimeout(t); }, [step]);
@@ -213,6 +217,48 @@ export default function CatAdoptionForm() {
       const cat = [...INDIVIDUAL_CATS, ...COMBO_OPTIONS].find((c) => c.id === id);
       return cat?.name;
     }).filter(Boolean).join("、");
+  };
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      // Upload photos first (Task 5 will implement this)
+      let photoPaths = [];
+
+      const { error } = await supabase.from('applications').insert({
+        selected_cats: selectedCats,
+        name: form.name,
+        gender: form.gender,
+        age: parseInt(form.age, 10),
+        phone: form.phone,
+        financial: form.financial,
+        ownership: form.ownership,
+        landlord_ok: form.ownership === '租屋' ? form.landlordOk : null,
+        screen_installed: form.screenInstalled,
+        family_agree: form.familyAgree,
+        has_cat_before: form.hasCatBefore,
+        cat_detail: form.hasCatBefore === '有' ? form.catDetail : null,
+        has_dog: form.hasDog,
+        dog_count: form.hasDog ? form.dogCount : null,
+        has_cat: form.hasCat,
+        cat_count: form.hasCat ? form.catCount : null,
+        has_other: form.hasOther,
+        other_detail: form.hasOther ? form.otherDetail : null,
+        outdoor: form.outdoor,
+        life_change_plan: form.lifeChangePlan,
+        photo_paths: photoPaths,
+      });
+
+      if (error) throw error;
+      setStep('done');
+    } catch (err) {
+      console.error('Submit error:', err);
+      setSubmitError('送出失敗，請稍後再試');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const nav = (dir) => { const i = STEPS.indexOf(step); setStep(STEPS[i + dir]); };
@@ -369,10 +415,15 @@ export default function CatAdoptionForm() {
             <RadioGroup label="會讓貓咪外出嗎？" required options={["完全室內", "偶爾外出（有牽繩）", "自由進出"]} value={form.outdoor} onChange={u("outdoor")} />
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 24 }}>
               <button onClick={() => nav(-1)} style={btnSecondary}>← 上一步</button>
-              <button onClick={() => setStep("done")} style={{ ...btnPrimary, background: "linear-gradient(135deg, #d4a85c, #b8944e)" }}>
-                送出申請 🎉
+              <button onClick={handleSubmit} disabled={submitting} style={{ ...btnPrimary, background: "linear-gradient(135deg, #d4a85c, #b8944e)", opacity: submitting ? 0.6 : 1, cursor: submitting ? 'wait' : 'pointer' }}>
+                {submitting ? '送出中...' : '送出申請 🎉'}
               </button>
             </div>
+            {submitError && (
+              <p style={{ color: '#c0392b', fontSize: 13, textAlign: 'center', marginTop: 12 }}>
+                {submitError}
+              </p>
+            )}
           </div>
         )}
 
