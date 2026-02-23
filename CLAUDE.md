@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Cat adoption screening form (浪浪領養申請網站) for three rescued kittens — two Siamese, one black cat. Built with Vite + React 19. All UI text is Traditional Chinese (Taiwan). Deployed to Vercel via GitHub auto-deploy on `main`.
+Cat adoption screening form (浪浪領養申請網站) for three rescued kittens — two Siamese, one black cat. Built with Vite + React 19, backed by Supabase (database + storage). All UI text is Traditional Chinese (Taiwan). Deployed to Vercel via GitHub auto-deploy on `main`.
+
+**Production URL**: https://kitten-adopt.vercel.app
 
 ## Build & Run Commands
 
@@ -21,9 +23,9 @@ No test framework is configured.
 
 ### Single-File Component Design
 
-The entire app lives in `src/App.jsx` (~400 lines). All components are defined in this one file:
+The entire app lives in `src/App.jsx` (~500 lines). All components are defined in this one file:
 
-- **CatAdoptionForm** (default export) — Main component with all form state and step navigation
+- **CatAdoptionForm** (default export) — Main component with all form state, step navigation, and Supabase submission logic
 - **FloatingPaws** — Decorative background paw emojis
 - **CatCard** — Cat selection cards with hover/select effects
 - **PhotoUploader** — File upload with preview (used in experience step for pet photos)
@@ -31,13 +33,26 @@ The entire app lives in `src/App.jsx` (~400 lines). All components are defined i
 
 Entry point is `src/main.jsx` which renders `<CatAdoptionForm />`.
 
-### 5-Step Form Flow
+### 6-Step Form Flow
 
 ```
-intro → catSelection → info → experience → done
+intro → catSelection → info → experience → review → done
 ```
 
-Steps `intro` and `done` are splash/confirmation screens. The three middle steps (`catSelection`, `info`, `experience`) show a progress bar.
+Steps `intro`, `review`, and `done` are splash/confirmation screens. The three middle steps (`catSelection`, `info`, `experience`) show a progress bar. The `review` step displays a read-only summary of all form data before submission.
+
+### Backend (Supabase)
+
+- **Database**: `applications` table stores all form submissions. RLS enabled — anon can INSERT only; SELECT/UPDATE/DELETE require service role.
+- **Storage**: `application-photos` private bucket for pet photos uploaded with the form. Anon can upload; signed URLs generated server-side for viewing.
+- **Client**: `src/lib/supabase.js` creates the Supabase client using `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` env vars.
+
+### Excel Export API
+
+`api/export.js` is a Vercel Serverless Function that exports all applications as `.xlsx`:
+- Auth: `Authorization: Bearer <EXPORT_SECRET>` header required
+- Generates signed URLs for photos (7-day expiry)
+- Column headers are in Traditional Chinese
 
 ### Styling
 
@@ -52,10 +67,21 @@ Mobile breakpoint at 480px via `useIsMobile()` custom hook.
 ### Key Conventions
 
 - No external state management — React `useState` only
-- Form data stays client-side (no backend/API)
+- Form data submitted to Supabase on the review step; photos uploaded to Supabase Storage
 - Conditional fields: landlord approval appears only if renting; cat detail appears only if has cat experience; pet counts appear only if corresponding pet type is checked
 - Cat data constants (`INDIVIDUAL_CATS`, `COMBO_OPTIONS`) are defined at module top level
 - Image paths reference `public/cats/` (full photos + avatar crops)
+
+### Environment Variables
+
+| Variable | Where | Purpose |
+|----------|-------|---------|
+| `VITE_SUPABASE_URL` | Frontend (build-time) | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Frontend (build-time) | Supabase anon key for client |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server only (`api/export.js`) | Admin access for reading all data |
+| `EXPORT_SECRET` | Server only (`api/export.js`) | Bearer token for export auth |
+
+Local dev uses `.env.local` (gitignored). Production env vars are set in Vercel.
 
 ### Image Assets
 
