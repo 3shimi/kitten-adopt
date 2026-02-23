@@ -224,8 +224,22 @@ export default function CatAdoptionForm() {
     setSubmitError(null);
 
     try {
-      // Upload photos first (Task 5 will implement this)
       let photoPaths = [];
+      if (photos.pets.length > 0) {
+        const applicationId = crypto.randomUUID();
+        for (const photo of photos.pets) {
+          const ext = photo.name.split('.').pop();
+          const path = `${applicationId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+          const { error: uploadError } = await supabase.storage
+            .from('application-photos')
+            .upload(path, photo.file);
+          if (uploadError) {
+            console.error('Upload error:', uploadError);
+            continue;
+          }
+          photoPaths.push(path);
+        }
+      }
 
       const { error } = await supabase.from('applications').insert({
         selected_cats: selectedCats,
