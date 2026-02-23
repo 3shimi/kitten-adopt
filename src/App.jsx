@@ -25,7 +25,7 @@ const CAT_AVATARS = {
   black3: "/cats/black3-avatar.jpg",
 };
 
-const STEPS = ["intro", "catSelection", "info", "experience", "done"];
+const STEPS = ["intro", "catSelection", "info", "experience", "review", "done"];
 
 const STEP_LABELS = {
   catSelection: "選擇貓咪",
@@ -163,10 +163,10 @@ function RadioGroup({ label, required, options, value, onChange }) {
 
 
 function ProgressBar({ step }) {
-  const formSteps = STEPS.filter((s) => s !== "intro" && s !== "done");
+  const formSteps = STEPS.filter((s) => s !== "intro" && s !== "done" && s !== "review");
   const idx = formSteps.indexOf(step);
   const pct = step === "done" ? 100 : step === "intro" ? 0 : ((idx + 1) / formSteps.length) * 100;
-  if (step === "intro" || step === "done") return null;
+  if (step === "intro" || step === "done" || step === "review") return null;
   return (
     <div style={{ marginBottom: 24 }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
@@ -247,7 +247,6 @@ export default function CatAdoptionForm() {
         has_other: form.hasOther,
         other_detail: form.hasOther ? form.otherDetail : null,
         outdoor: form.outdoor,
-        life_change_plan: form.lifeChangePlan,
         photo_paths: photoPaths,
       });
 
@@ -413,6 +412,73 @@ export default function CatAdoptionForm() {
             </div>
 
             <RadioGroup label="會讓貓咪外出嗎？" required options={["完全室內", "偶爾外出（有牽繩）", "自由進出"]} value={form.outdoor} onChange={u("outdoor")} />
+            {navButtons()}
+          </div>
+        )}
+
+        {step === "review" && (
+          <div style={cardStyle}>
+            {sectionTitle("📋", "確認你的申請資料")}
+            <p style={{ fontSize: 13, color: "#8b7d6b", marginBottom: 20, lineHeight: 1.6 }}>
+              請確認以下資料正確後再送出
+            </p>
+
+            {/* Section 1: Cat selection */}
+            <div style={{ background: "rgba(255,255,255,0.6)", borderRadius: 14, padding: "16px 18px", marginBottom: 16, border: "1px solid #e8ddd0" }}>
+              <h3 style={{ fontFamily: "'Noto Serif TC', serif", fontSize: 15, color: "#3a2e26", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 20 }}>🐾</span> 想領養的貓咪
+              </h3>
+              <p style={{ fontSize: 14, color: "#5a4630", margin: 0 }}>{getSelectionSummary()}</p>
+            </div>
+
+            {/* Section 2: Basic info */}
+            <div style={{ background: "rgba(255,255,255,0.6)", borderRadius: 14, padding: "16px 18px", marginBottom: 16, border: "1px solid #e8ddd0" }}>
+              <h3 style={{ fontFamily: "'Noto Serif TC', serif", fontSize: 15, color: "#3a2e26", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 20 }}>📝</span> 基本資料
+              </h3>
+              <div style={{ display: "grid", gap: 8 }}>
+                {[
+                  ["姓名", form.name],
+                  ["性別", form.gender],
+                  ["年齡", form.age],
+                  ["手機/LINE", form.phone],
+                  ["經濟狀況", form.financial],
+                  ["住家", form.ownership],
+                  ...(form.ownership === "租屋" ? [["房東同意", form.landlordOk]] : []),
+                  ["紗窗/防墜網", form.screenInstalled],
+                  ["家人同意", form.familyAgree],
+                ].map(([label, value]) => (
+                  <div key={label} style={{ display: "flex", fontSize: 14 }}>
+                    <span style={{ color: "#8b7d6b", minWidth: 100, flexShrink: 0 }}>{label}</span>
+                    <span style={{ color: "#3a2e26", fontWeight: 500 }}>{value || "—"}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Section 3: Experience */}
+            <div style={{ background: "rgba(255,255,255,0.6)", borderRadius: 14, padding: "16px 18px", marginBottom: 16, border: "1px solid #e8ddd0" }}>
+              <h3 style={{ fontFamily: "'Noto Serif TC', serif", fontSize: 15, color: "#3a2e26", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 20 }}>🏠</span> 養寵經驗
+              </h3>
+              <div style={{ display: "grid", gap: 8 }}>
+                {[
+                  ["養過貓", form.hasCatBefore],
+                  ...(form.hasCatBefore === "有" && form.catDetail ? [["養貓經歷", form.catDetail]] : []),
+                  ...(form.hasDog ? [["狗狗", `${form.dogCount || "—"} 隻`]] : []),
+                  ...(form.hasCat ? [["貓咪", `${form.catCount || "—"} 隻`]] : []),
+                  ...(form.hasOther ? [["其他動物", form.otherDetail || "—"]] : []),
+                  ["外出方式", form.outdoor],
+                ].map(([label, value]) => (
+                  <div key={label} style={{ display: "flex", fontSize: 14 }}>
+                    <span style={{ color: "#8b7d6b", minWidth: 100, flexShrink: 0 }}>{label}</span>
+                    <span style={{ color: "#3a2e26", fontWeight: 500 }}>{value || "—"}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Navigation: back + submit */}
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 24 }}>
               <button onClick={() => nav(-1)} style={btnSecondary}>← 上一步</button>
               <button onClick={handleSubmit} disabled={submitting} style={{ ...btnPrimary, background: "linear-gradient(135deg, #d4a85c, #b8944e)", opacity: submitting ? 0.6 : 1, cursor: submitting ? 'wait' : 'pointer' }}>
