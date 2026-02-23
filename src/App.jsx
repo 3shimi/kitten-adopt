@@ -99,14 +99,47 @@ function CatCard({ cat, selected, onToggle, isCombo, mobile }) {
   );
 }
 
+function compressImage(file, { maxWidth = 1200, maxHeight = 1200, quality = 0.8 } = {}) {
+  return new Promise((resolve) => {
+    // Skip non-image or already small files
+    if (!file.type.startsWith("image/") || file.size <= 200 * 1024) {
+      resolve(file);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width <= maxWidth && height <= maxHeight) {
+        resolve(file);
+        return;
+      }
+      const ratio = Math.min(maxWidth / width, maxHeight / height);
+      width = Math.round(width * ratio);
+      height = Math.round(height * ratio);
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => resolve(new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" })),
+        "image/jpeg",
+        quality
+      );
+    };
+    img.onerror = () => resolve(file);
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 function PhotoUploader({ label, photos, onUpload, onRemove }) {
   const inputRef = useRef(null);
-  const handleFiles = (e) => {
-    Array.from(e.target.files).forEach((file) => {
+  const handleFiles = async (e) => {
+    for (const file of Array.from(e.target.files)) {
+      const compressed = await compressImage(file);
       const reader = new FileReader();
-      reader.onload = (ev) => onUpload({ name: file.name, url: ev.target.result, file });
-      reader.readAsDataURL(file);
-    });
+      reader.onload = (ev) => onUpload({ name: compressed.name, url: ev.target.result, file: compressed });
+      reader.readAsDataURL(compressed);
+    }
     e.target.value = "";
   };
   return (
