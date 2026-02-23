@@ -1,0 +1,26 @@
+node_modules/
+dist/
+
+# Dev screenshots
+*.png
+
+# Original photo assets (processed versions in public/cats/)
+pictures/
+
+# OS files
+.DS_Store
+
+# Environment
+.env
+.env.local
+
+# Editor / IDE
+.claude/
+.agents/
+.windsurf/
+.playwright-mcp/
+.mcp.json
+skills-lock.json
+
+# Original mockup (base64 embedded, 260KB)
+adoption-form.jsx
