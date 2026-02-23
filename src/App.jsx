@@ -342,7 +342,7 @@ export default function CatAdoptionForm() {
                     <img src={CAT_AVATARS[cat.img]} alt={cat.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   </div>
                   <p style={{ fontSize: mobile ? 15 : 17, color: "#5a4630", marginTop: 12, marginBottom: 2, fontWeight: 600, fontFamily: "'Noto Serif TC', serif" }}>{cat.name}</p>
-                  <p style={{ fontSize: 12, color: "#a08c6e", margin: 0 }}>{cat.weight}</p>
+                  {!mobile && <p style={{ fontSize: 12, color: "#a08c6e", margin: 0 }}>{cat.weight}</p>}
                 </div>
               ))}
             </div>
