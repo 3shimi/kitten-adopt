@@ -190,7 +190,7 @@ export default function CatAdoptionForm() {
     ownership: "", landlordOk: "", screenInstalled: "", familyAgree: "",
     hasCatBefore: "", catDetail: "",
     hasDog: false, dogCount: "", hasCat: false, catCount: "", hasOther: false, otherDetail: "",
-    outdoor: "", lifeChangePlan: "",
+    outdoor: "",
   });
 
   const [photos, setPhotos] = useState({ pets: [] });
@@ -205,7 +205,7 @@ export default function CatAdoptionForm() {
   const removePhoto = (cat) => (i) => setPhotos((p) => ({ ...p, [cat]: p[cat].filter((_, j) => j !== i) }));
 
   const toggleCat = (catId) => {
-    setSelectedCats((prev) => prev.includes(catId) ? prev.filter((c) => c !== catId) : [...prev, catId]);
+    setSelectedCats((prev) => prev.includes(catId) ? [] : [catId]);
   };
 
   const getSelectionSummary = () => {
@@ -367,7 +367,6 @@ export default function CatAdoptionForm() {
             </div>
 
             <RadioGroup label="會讓貓咪外出嗎？" required options={["完全室內", "偶爾外出（有牽繩）", "自由進出"]} value={form.outdoor} onChange={u("outdoor")} />
-            <InputField label="如果未來搬家或有人生變動，貓咪怎麼辦？" required type="textarea" value={form.lifeChangePlan} onChange={u("lifeChangePlan")} placeholder="簡單說明你的想法" />
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 24 }}>
               <button onClick={() => nav(-1)} style={btnSecondary}>← 上一步</button>
               <button onClick={() => setStep("done")} style={{ ...btnPrimary, background: "linear-gradient(135deg, #d4a85c, #b8944e)" }}>
