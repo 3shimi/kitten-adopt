@@ -22,5 +22,5 @@ pictures/
 .mcp.json
 skills-lock.json
 
-# Original mockup (base64 embedded, 260KB)
-adoption-form.jsx
+# Reference files (original mockup, etc.)
+reference/
